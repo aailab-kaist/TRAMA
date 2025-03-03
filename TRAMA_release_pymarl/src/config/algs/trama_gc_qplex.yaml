@@ -1,0 +1,131 @@
+# --- VQMIX specific parameters ---
+
+# use epsilon greedy action selector
+action_selector: "epsilon_greedy"
+goal_selector: "softmax_selector"
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+
+#mac: "lagma_mac"
+mac: "lagma_gc_mac"
+agent: "lagma_gc"
+#mac: "lagma_mac"
+#agent: "lagma"
+gp_agent: "lagma_gp"
+
+buffer_size: 5000
+
+# update the target network every {} episodes
+target_update_interval: 200
+
+# use the Q_Learner to train
+agent_output_type: "q"
+learner: "lagma_gc_learner"
+double_q: True
+mixer: "dmaq_qatten"
+mixing_embed_dim: 32
+hypernet_embed: 64
+adv_hypernet_layers: 1
+adv_hypernet_embed: 64
+
+num_kernel: 4
+is_minus_one: True
+is_adv_attention: True
+is_stop_gradient: True
+
+#.. classifier parameters ------
+classifier: "classifier"
+classifier_input_type : 2  # 1-full sequence, 2-reduced seq # used for sim_type <=3
+max_monitoring_timstep: 50 # maximum timestep for monitoring prediction accuracy
+n_monitoring_interval:  5  # pred.acc. monitoring interval
+
+#.. vae parameters -------------
+vae: "vqvae"
+vqvae_update_interval     : 10    # default (10) training run number
+codebook_update_interval  : 40    # default (10) training run number
+vqvae_training_batch      : 512   # training samples from replay buffer should be smaller than the size of replay buffer
+vqvae_training_mini_batch : 128   # mini-batch size for vqvae training
+
+vqvae_update_type: 1              # 1-update with replay buffer, 2-update once in a while separately
+vqvae_training_stop: 100000000    # stop training timestep (t_env)
+flag_desirability: False          # True - consider desirability when generating goal-reaching trajectory
+incentive_type: 1                 # reward by 1-moving average, 2-sequence value (optimistic)
+flag_UCB_incentive: False         # True - consider UCB incentive in value estimation, False - not consider
+UCB_param_t   : 2                 # t-value in UCB
+
+vae_hidden_dim: 64
+n_codes       : 256  # default (64)
+latent_dim    : 4    # default (8)
+n_max_code    : 100  # maximum number of buffer for each embedding node for moving average computation
+#n_ref_seq     : 50  # the number of reference sequence 
+k_top_seq     : 30   # the number of top-k sequence w.r.t. cq0 value
+lambda_exp    : 0.5  # level of explorative incentive when generating Cq0, Cqt
+
+recon_type    : 1    # 1-state, 2-state/value, 3-both state/value conditioned on t
+return_type   : 1    # 1-Cqt, # 2-Rtd (only applied for recon_type=3)
+ref_max_time  : 1    # 1-batch_time_max, 2-env_time_max
+
+# TRAMA ---------------------------------  
+n_cluster                  : 4       # the number of cluster for sequence clustering
+n_min_cluster              : 3       # minimum number of cluster for trajectory class prediction
+n_pred_step                : 1       # agent-wise trajectory prediction step. 1 means making prediction every step
+flag_init_centroid         : True    # True: use previous centroid as initial centroid in Kmeans clustering
+flag_centroid_matching     : False   # True: conduct centroid matching
+
+use_trj_dependent_node     : True    # True: use trajectory dependent vq nodes
+use_trj_Cqt                : True    # True: use trajectory dependent Cqt value for each node
+
+goal_repr_dim              : 32      # use the same dim with latent_dim
+lambda_gp_loss             : 0.1     # scale factor for goal prediction loss
+
+flag_seq_cluster           :   True  # True - conduct sequence clustering
+T_cluster_save             :  50000  # t_env: starting time for saving cluster sequence 
+T_cluster_start            : 100000  # t_env: start clustering
+cluster_update_interval    :  50000  # t_env about 1/10 buffer update when t_batch_max = 100
+cluster_update_episode_itv :    500  # 500: when 10 % of replay_buffer is updated
+batch_size_clustering      :   5000  # all if possible
+min_batch_size_clustering  :   1000  # all if possible
+# ---------------------------------------  
+
+#.. settings for RBS-Kmeans (fixed, default settings)
+clustering_method   : "rbs_cluster"
+flag_reduced_seq    : False # reduced sequence input for clustering
+similarity_type     : 4 # similarity type, 1: Euclidean, 2: binary similarity, 3: binary similarity with nonzero element
+                        # 4: mean quantized vector (final choice)
+# obsolete
+seq_sampling_type   : 1 # sampling type for centroid samples, 1: argmax, 2: random 
+prd_sim_type        : 4 # similarity type, 1: Euclidean, 2: binary similarity, 3: binary similarity with nonzero(or nondefault) element, 4: # of common element 
+num_centroid_sample : 1 # the number of samples for centroid of each class
+#----------------------------------------
+
+# default settings
+flag_zero_state_management : True    # False - original loss
+flag_batch_wise_vqvae_loss : False   # False - original loss 
+flag_loss_type             : 1       # 0 - mixed loss, 1-L2 norm, 2-MSE loss
+
+use_vqvae          : True
+recon_coef         : 0.1  # effective only for recon_type=2 and recon_type=3
+ce_coef            : 1.0
+vq_coef            : 0.25
+commit_coef        : 0.125
+coverage_coef      : 0.125
+buffer_update_time : 50000 # t_env: update vqvae inearly training phase at every trianing step
+trj_update_freq    : 5 # timestep (large number means only initial update)
+buffer_update_ref  : 2 # 1-Cq0 (sum_rewards), 2-Cqt (reward_tgo)
+
+save_vae_info      : False
+sampling_type      : 1 # 1-random, 2-Categorical # a reference trajectory sequence sampling from k-trajrectories
+timestep_emb       : True # timestep dependent embedding learning on/off for L_coverage
+goal_sampling_base : 3 # 1-random, 2-use the same trajectory sequences, 3-random sample from trajectory sequence
+# ------------------------------
+
+# Qatten coefficient
+n_head: 4
+attend_reg_coef: 0.001
+state_bias: True
+mask_dead: False
+weighted_head: False
+nonlinear: False
+
+name: "lagma-gc-qplex"     
